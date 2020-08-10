@@ -166,7 +166,7 @@ Colors List
 
 cyan 	= "\033[0;96m"
 green 	= "\033[0;92m"
-white 	= "\033[0;97m"
+white 	= "\033[0;107m"
 red 	= "\033[0;91m"
 blue 	= "\033[0;94m"
 yellow 	= "\033[0;33m"
@@ -288,6 +288,7 @@ def doSomethingPlis(listOfSuidBins):
 
 
 def monitServices():
+	print(white + "[" + blue + "#" + white + "] " + yellow + "Monitoring services...")
 	command = "ps -eo pid,cmd"
 	baseProcess = {}
 	nextProcess = {}
@@ -312,7 +313,7 @@ def monitServices():
 		if diff:
 			for d in diff:
 				print(red + "Found: " + nextProcess[d])
-			print(yellow + "------------------------------------")
+			print(white + "------------------------------")
 
 		baseProcess = nextProcess.copy()
 		nextProcess.clear()
@@ -346,8 +347,6 @@ def getopts():
 				sleep(0.5)
 
 		if argv[1] == '-p':
-			print(white + "[" + magenta + "$" + white + "] " + white + "Checking services...")
-			print(white + barLine)
 			monitServices()
 
 	if len(argv == 1):
