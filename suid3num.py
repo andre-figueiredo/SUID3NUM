@@ -290,33 +290,32 @@ def doSomethingPlis(listOfSuidBins):
 def monitServices():
 	print(white + "[" + blue + "#" + white + "] " + yellow + "Monitoring services...")
 	command = "ps -eo pid,cmd"
-	baseProcess = {}
-	nextProcess = {}
+	baseProcesses = {}
+	nextProcesses = {}
 
 	result = popen(command).read().strip().split("\n")
 	result.pop(0)
-	result.pop(-1)
 	for r in result:
-		baseProcess.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+		baseProcesses.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+
 
 	while True:
 		result.clear()
 		result = popen(command).read().strip().split("\n")
 		result.pop(0)
-		result.pop(-1)
 		for r in result:
-			nextProcess.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
-		keys_base = set(baseProcess.keys())
-		keys_next = set(nextProcess.keys())
+			nextProcesses.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+		keys_base = set(baseProcesses.keys())
+		keys_next = set(nextProcesses.keys())
 		diff = keys_next - keys_base
 
 		if diff:
 			for d in diff:
-				print(red + "Found: " + nextProcess[d])
+				print(red + "Found: " + nextProcesses[d])
 			print(white + "------------------------------")
 
-		baseProcess = nextProcess.copy()
-		nextProcess.clear()
+		baseProcess = nextProcesses.copy()
+		nextProcesses.clear()
 
 		sleep(5)
 
