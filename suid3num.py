@@ -166,7 +166,7 @@ Colors List
 
 cyan 	= "\033[0;96m"
 green 	= "\033[0;92m"
-white 	= "\033[0;107m"
+white 	= "\033[0;97m"
 red 	= "\033[0;91m"
 blue 	= "\033[0;94m"
 yellow 	= "\033[0;33m"
@@ -295,6 +295,8 @@ def monitServices():
 
 	result = popen(command).read().strip().split("\n")
 	result.pop(0)
+	result.pop(-1)
+	result.pop(-1)
 	for r in result:
 		baseProcesses.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
 
@@ -303,8 +305,10 @@ def monitServices():
 		result.clear()
 		result = popen(command).read().strip().split("\n")
 		result.pop(0)
+		result.pop(-1)
+		result.pop(-1)
 		for r in result:
-			nextProcesses.update({r.strip().split(" ")[0] : r.strip().split(" ")[1]})
+			nextProcesses.update({r.strip().split(" ")[0]:r.strip().split(" ")[1]})
 		keys_base = set(baseProcesses.keys())
 		keys_next = set(nextProcesses.keys())
 		diff = keys_next - keys_base
@@ -312,7 +316,7 @@ def monitServices():
 		if diff:
 			for d in diff:
 				print(red + "Found: " + nextProcesses[d])
-			print(white + "------------------------------")
+			print(white + barLine)
 
 		baseProcess = nextProcesses.copy()
 		nextProcesses.clear()
